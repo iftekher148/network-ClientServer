@@ -1,0 +1,52 @@
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.Scanner;
+
+public class Client {
+  private Socket clientSocket= null;
+  private DataInputStream dataIn=null;
+  private DataOutputStream dataOut=null;
+  private Scanner scan = new Scanner(System.in);
+  
+  private String sendMessege=null;
+  private String receivedMessege=null;
+  
+  public void RunClient(String serverAddress,int port) {
+	  try {
+		  clientSocket = new Socket(serverAddress,port);
+		  System.out.print("Success");
+		  
+		  dataIn= new DataInputStream(clientSocket.getInputStream());
+		   dataOut = new DataOutputStream (clientSocket.getOutputStream());
+		   
+		   while(true) {
+			   System.out.println("type your massege");
+			  sendMessege =(String) dataIn.readUTF();
+			  dataOut.writeUTF(sendMessege);
+			  if( sendMessege.equals("EXIT")) break;
+			  
+			  receivedMessege= (String) dataIn.readUTF();
+			  System.out.println("rply :" + receivedMessege );
+			   
+		   }
+		   
+		   scan.close();
+		   dataIn.close();
+		   dataOut.close();
+		   clientSocket.close();
+		   
+	  }
+	  
+
+	   catch(IOException e) {
+		   System.out.println(e);
+	   }
+  }
+  
+  public static void main(String[] args) {
+	  Client client =new Client();
+	  client.RunClient("127.0.0.1", 33333);
+  }
+}

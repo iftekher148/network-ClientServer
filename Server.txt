@@ -1,0 +1,74 @@
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Scanner;
+
+public class Server {
+
+	private ServerSocket serverSocket=null;
+	private Socket clientSocket=null;
+	private DataInputStream dataIn=null;
+	private DataOutputStream dataOut=null;
+	private Scanner scan = new Scanner(System.in);
+	private String messege=null;
+	
+	private LocalTime time=null;
+	private LocalDate date= null;
+	
+	private DateTimeFormatter dateFormatter= DateTimeFormatter.ofPattern("hh-MMM-YYYY");
+	private  DateTimeFormatter timeFormatter= DateTimeFormatter.ofPattern("h:mm a");
+	
+	 public void RunServer(int port){
+		try {
+			serverSocket= new ServerSocket(port);
+			clientSocket=serverSocket.accept();
+			
+			dataIn= new DataInputStream(clientSocket.getInputStream());
+			dataOut=new DataOutputStream(clientSocket.getOutputStream());
+			
+			while(true) {
+			     messege=(String) dataIn.readUTF();
+			     if(messege.equals("EXIT")) break;
+			     else if(messege.equals("Hello")) dataOut.writeUTF("Welcome");
+			     else if( messege.equals("Date")) {
+			    	 date=LocalDate.parse(LocalDate.now().toString());
+			    	 dataOut.writeUTF(dateFormatter.format(date));
+			     }
+			     
+			     else if(messege.equals("Time")) {
+			    	 time=LocalTime.parse(LocalTime.now().toString());
+			    	 dataOut.writeUTF(timeFormatter.format(time));
+			     }
+			     
+			     else if(messege.equals("DateTime")) {
+			    	 time=LocalTime.parse(LocalTime.now().toString());
+			    	 date=LocalDate.parse(LocalDate.now().toString());
+			    	 dataOut.writeUTF("Time :"+ timeFormatter.format(time) + "\t" + "Date:"+ dateFormatter.format(date));
+			    	 
+			     }
+			     
+			     else dataOut.writeUTF("invalid massege");
+			}
+			
+			scan.close();
+			dataIn.close();
+			dataOut.close();
+			clientSocket.close();
+			serverSocket.close();
+		}
+		catch(IOException e) {
+			System.out.println(e);
+		}
+	 }
+	 
+	 public static void main(String [] args) {
+		 Server server= new Server();
+		 server.RunServer(3333);
+	 }
+}
+
